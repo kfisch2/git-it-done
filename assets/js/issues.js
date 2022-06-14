@@ -2,13 +2,23 @@ let issueContainerEl = document.querySelector("#issues-container");
 let limitWarningEl = document.querySelector("#limit-warning")
 let repoNameEl = document.querySelector("#repo-name")
 
-let getRepoName  = () => {
+let getRepoName = () => {
+  // grab repo name from url query string
   let queryString = document.location.search;
   repoName = queryString.split("=")[1];
   console.log(repoName);
-  getReposIssues(repoName);
-  repoNameEl.textContent = repoName;
-}
+
+  if (repoName) {
+    // display repo name
+    repoNameEl.textContent = repoName;
+    getReposIssues(repoName);
+  } else {
+    // if no repo, redirect to homepage
+    document.location.replace("./index.html")
+  }
+
+
+};
 
 let getReposIssues = (repo) => {
   let apiUrl = "https://api.github.com/repos/" + repo + "/issues?direction=asc";
@@ -23,7 +33,8 @@ let getReposIssues = (repo) => {
         }
       });
     } else {
-      alert("Something went wrong...")
+      // if not successful, redirect to home
+      document.location.replace("./index.html")
     };
   });
 };
