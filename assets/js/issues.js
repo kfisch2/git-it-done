@@ -1,13 +1,26 @@
 let issueContainerEl = document.querySelector("#issues-container");
+let limitWarningEl = document.querySelector("#limit-warning")
+let repoNameEl = document.querySelector("#repo-name")
+
+let getRepoName  = () => {
+  let queryString = document.location.search;
+  repoName = queryString.split("=")[1];
+  console.log(repoName);
+  getReposIssues(repoName);
+  repoNameEl.textContent = repoName;
+}
 
 let getReposIssues = (repo) => {
-  console.log(repo);
   let apiUrl = "https://api.github.com/repos/" + repo + "/issues?direction=asc";
   fetch(apiUrl).then(function (response) {
     if (response.ok) {
       response.json().then(function (data) {
-        console.log(data);
         displayIssues(data);
+
+        // check if api has paginated issues
+        if (response.headers.get("Link")) {
+          displayWarning(repo)
+        }
       });
     } else {
       alert("Something went wrong...")
@@ -15,7 +28,17 @@ let getReposIssues = (repo) => {
   });
 };
 
-getReposIssues();
+let displayWarning = function (repo) {
+  // add text to warning container
+  limitWarningEl.textContent = "To see more than 30 issues, visit ";
+  var linkEl = document.createElement("a");
+  linkEl.textContent = "See More Issues on GitHub.com";
+  linkEl.setAttribute("href", "https://github.com/" + repo + "/issues");
+  linkEl.setAttribute("target", "_blank");
+
+  // append to warning container
+  limitWarningEl.appendChild(linkEl);
+};
 
 let displayIssues = (issues) => {
   if (issues.length === 0) {
@@ -44,9 +67,12 @@ let displayIssues = (issues) => {
       typeEl.textContent = "(Pull request)"
     } else {
       typeEl.textContent = "(Issue)";
-    }; 
+    };
 
     issueEl.appendChild(typeEl)
     issueContainerEl.appendChild(issueEl)
   };
 };
+
+
+getRepoName();
